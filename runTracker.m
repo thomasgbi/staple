@@ -4,25 +4,27 @@ function runTracker(sequence, start_frame)
     %% Read params.txt
     params = readParams('params.txt');
 	%% load video info
-	sequence_path = ['../Sequences/',sequence,'/'];
-    img_path = [sequence_path 'imgs/'];
+	%sequence_path = ['../Sequences/',sequence,'/'];
+    img_path = sequence;
+    
     %% Read files
-    text_files = dir([sequence_path '*_frames.txt']);
-    f = fopen([sequence_path text_files(1).name]);
-    frames = textscan(f, '%f,%f');
-    if exist('start_frame')
-        frames{1} = start_frame;
-    else
+    %text_files = dir([sequence_path '*_frames.txt']);
+    %f = fopen([sequence_path text_files(1).name]);
+    %frames = textscan(f, '%f,%f');
+    %if exist('start_frame')
+    %    frames{1} = start_frame;
+    %else
         frames{1} = 1;
-    end
+    %end
     
-    fclose(f);
+    %fclose(f);
     
-    params.bb_VOT = csvread([sequence_path 'groundtruth.txt']);
+    params.bb_VOT = csvread([img_path '/' 'groundtruth.txt']);
     region = params.bb_VOT(frames{1},:);
     %%%%%%%%%%%%%%%%%%%%%%%%%
     % read all the frames in the 'imgs' subfolder
-    dir_content = dir([sequence_path 'imgs/']);
+    %dir_content = dir([img_path 'imgs/']);
+    dir_content = dir([img_path '*.jpg']);
     % skip '.' and '..' from the count
     n_imgs = length(dir_content) - 2;
     img_files = cell(n_imgs, 1);
