@@ -24,6 +24,9 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
     output_sigma = sqrt(prod(p.norm_target_sz)) * p.output_sigma_factor / p.hog_cell_size;
     y = gaussianResponse(p.cf_response_size, output_sigma);
     yf = fft2(y);
+    % 
+    print_results = true;
+    file_output = fopen(p.fout, 'w');
     %% SCALE ADAPTATION INITIALIZATION
     if p.scale_adaptation
         % Code from DSST
@@ -196,8 +199,11 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
 
         OTB_rect_positions(frame,:) = rect_position;
 
-        if p.fout > 0,  fprintf(p.fout,'%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4));   end
-
+        %if p.fout > 0,  fprintf(file_ouput,'%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4));   end
+        if print_results == true
+            fprintf(file_output,'%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4)); 
+        end
+        
         %% VISUALIZATION
         if p.visualization == 1
             if isToolboxAvailable('Computer Vision System Toolbox')
@@ -219,6 +225,7 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
     results.type = 'rect';
     results.res = OTB_rect_positions;
     results.fps = num_frames/(elapsed_time - t_imread);
+    fclose(file_output);
 end
 
 % Reimplementation of Hann window (in case signal processing toolbox is missing)

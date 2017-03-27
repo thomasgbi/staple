@@ -5,7 +5,7 @@ function runTracker(sequence, start_frame)
     params = readParams('params.txt');
 	%% load video info
 	%sequence_path = ['../Sequences/',sequence,'/'];
-    img_path = sequence;
+    img_path = strcat('/dados/dissertacao/test_vot_all-50/', sequence, '/');
     
     %% Read files
     %text_files = dir([sequence_path '*_frames.txt']);
@@ -26,7 +26,7 @@ function runTracker(sequence, start_frame)
     %dir_content = dir([img_path 'imgs/']);
     dir_content = dir([img_path '*.jpg']);
     % skip '.' and '..' from the count
-    n_imgs = length(dir_content) - 2;
+    n_imgs = length(dir_content) - 2; %%%% verificar
     img_files = cell(n_imgs, 1);
     for ii = 1:n_imgs
         img_files{ii} = dir_content(ii+2).name;
@@ -64,7 +64,7 @@ function runTracker(sequence, start_frame)
 		params.videoPlayer = vision.VideoPlayer('Position', [100 100 [size(im,2), size(im,1)]+30]);
 	end
     % in runTracker we do not output anything
-	params.fout = -1;
+	params.fout = strcat('results/', sequence, '.txt');
 	% start the actual tracking
 	trackerMain(params, im, bg_area, fg_area, area_resize_factor);
     fclose('all');
