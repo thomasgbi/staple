@@ -25,7 +25,7 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
     y = gaussianResponse(p.cf_response_size, output_sigma);
     yf = fft2(y);
     % 
-    print_results = true;
+    print_results = false;
     file_output = fopen(p.fout, 'w');
     %% SCALE ADAPTATION INITIALIZATION
     if p.scale_adaptation
