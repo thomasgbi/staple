@@ -25,7 +25,7 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
     y = gaussianResponse(p.cf_response_size, output_sigma);
     yf = fft2(y);
     % 
-    print_results = false;
+    print_results = true;
     file_output = fopen(p.fout, 'w');
     %% SCALE ADAPTATION INITIALIZATION
     if p.scale_adaptation
@@ -56,6 +56,11 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
         max_scale_factor = p.scale_step ^ floor(log(min([size(im,1) size(im,2)] ./ target_sz)) / log(p.scale_step));
     end
 
+    %%%%
+    %boundingbox
+    ground_truth = csvread([p.img_path 'groundtruth.txt']);
+    %disp([p.img_path 'groundtruth.txt']);
+    
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
     t_imread = 0;
     %% MAIN LOOP
@@ -200,8 +205,22 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
         OTB_rect_positions(frame,:) = rect_position;
 
         %if p.fout > 0,  fprintf(file_ouput,'%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4));   end
+        [cx, cy, w, h] = getAxisAlignedBB(ground_truth(frame, :));
+        x = cx - w/2;
+        y = cy - h/2;
+        overlap = bboxOverlapRatio(rect_position, [x y w h]);
+        % restart bb with ground truth
+        if overlap < 0.01
+            %disp(targetPosition);
+            pos = [cy cx];
+            %disp(targetPosition);
+            %disp(targetSize);
+            target_sz = [h w];
+            %disp(targetSize);
+        end
+        
         if print_results == true
-            fprintf(file_output,'%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4)); 
+            fprintf(file_output,'%.2f,%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4), overlap); 
         end
         
         %% VISUALIZATION
