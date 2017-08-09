@@ -25,6 +25,7 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
     y = gaussianResponse(p.cf_response_size, output_sigma);
     yf = fft2(y);
     % 
+    loss = 0;
     print_results = true;
     file_output = fopen(p.fout, 'w');
     %% SCALE ADAPTATION INITIALIZATION
@@ -208,19 +209,21 @@ function [results] = trackerMain(p, im, bg_area, fg_area, area_resize_factor)
         [cx, cy, w, h] = getAxisAlignedBB(ground_truth(frame, :));
         x = cx - w/2;
         y = cy - h/2;
-        overlap = bboxOverlapRatio(rect_position, [x y w h]);
+        %overlap = bboxOverlapRatio(rect_position, [x y w h]);
+        overlap = bboxOverlapRatio(rect_position, ground_truth(frame, :));
         % restart bb with ground truth
-        if overlap < 0.01
+        if overlap < 0.2
             %disp(targetPosition);
             pos = [cy cx];
             %disp(targetPosition);
             %disp(targetSize);
             target_sz = [h w];
+            loss = loss + 1;
             %disp(targetSize);
         end
         
         if print_results == true
-            fprintf(file_output,'%.2f,%.2f,%.2f,%.2f,%.2f\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4), overlap); 
+            fprintf(file_output,'%.2f,%.2f,%.2f,%.2f,%.2f,%d\n', rect_position(1),rect_position(2),rect_position(3),rect_position(4), overlap, loss); 
         end
         
         %% VISUALIZATION
